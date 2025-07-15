@@ -10,12 +10,13 @@ const io = socketIO(server, {
   }
 });
 
+
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
   socket.on('send-message', (msg) => {
     console.log('Message:', msg);
-    io.emit('receive-message', msg);
+    socket.broadcast.emit('receive-message', msg);
   });
 
   socket.on('disconnect', () => {
