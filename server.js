@@ -1,39 +1,28 @@
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const socketIO = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: { origin: "*" }
+const io = socketIO(server, {
+  cors: {
+    origin: "*", // Allow Android to connect
+  }
 });
 
-let counter = 5;
-
 io.on('connection', (socket) => {
-  console.log('New client connected');
+  console.log('User connected:', socket.id);
 
-  socket.on('increment', () => {
-    counter += 1;
-    io.emit('incremented', counter);
-    console.log(`Counter incremented: ${counter}`);
-  });
-
-  socket.on('reset', () => {
-    counter = 0;
-    io.emit('reset', counter);
-    console.log(`Reseted Counter: ${counter}`);
+  socket.on('send-message', (msg) => {
+    console.log('Message:', msg);
+    io.emit('receive-message', msg);
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log('User disconnected:', socket.id);
   });
 });
 
-// ✅ Use Render-assigned port
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Socket.IO server running on port ${PORT}`);
+server.listen(3000, () => {
+  console.log('Server running on port 3000');
 });
-
